@@ -19,6 +19,7 @@ import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.event.Level
+import java.io.File
 import java.sql.Connection
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -26,12 +27,12 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
-    Database.connect("jdbc:sqlite:file:///home/leon/study/server-api/build/data.db", "org.sqlite.JDBC")
+    Database.connect("jdbc:sqlite:file://${File("").absolutePath}/build/data.db", "org.sqlite.JDBC")
     TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     transaction {
         // print sql to std-out
         addLogger(StdOutSqlLogger)
-        SchemaUtils.createMissingTablesAndColumns(Users)
+        SchemaUtils.create(Users)
     }
     install(Compression) {
         gzip {
