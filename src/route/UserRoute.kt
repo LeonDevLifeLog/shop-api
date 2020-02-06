@@ -4,6 +4,7 @@ import com.github.leondevlifelog.JWTPrincipal
 import com.github.leondevlifelog.JwtConfig
 import com.github.leondevlifelog.model.*
 import io.ktor.application.call
+import io.ktor.application.log
 import io.ktor.auth.authenticate
 import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
@@ -47,7 +48,13 @@ fun Routing.user() {
             }
         }
         post("register") {
-            val registerRequest = call.receive<UserRegisterRequest>()
+            val registerRequest: UserRegisterRequest = try {
+                call.receive<UserRegisterRequest>()
+            } catch (e: Exception) {
+                this.context.application.log.error("validate error", e)
+                call.respond(e)
+                return@post
+            }
             val user = transaction {
                 User.find { Users.username eq registerRequest.username }.firstOrNull()
             }
