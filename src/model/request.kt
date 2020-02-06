@@ -1,8 +1,10 @@
 package com.github.leondevlifelog.model
 
+import kotlinx.serialization.Serializable
 import org.valiktor.functions.hasSize
 import org.valiktor.validate
 
+@Serializable
 data class UserLoginRequest(val username: String, val password: String) {
     init {
         validate(this) {
@@ -12,6 +14,7 @@ data class UserLoginRequest(val username: String, val password: String) {
     }
 }
 
+@Serializable
 data class UserRegisterRequest(val username: String, val password: String) {
     init {
         validate(this) {

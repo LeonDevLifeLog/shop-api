@@ -7,11 +7,14 @@ import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.jwt.jwt
 import io.ktor.features.*
-import io.ktor.gson.gson
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.request.path
 import io.ktor.routing.routing
+import io.ktor.serialization.DefaultJsonConfiguration
+import io.ktor.serialization.serialization
+import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -44,8 +47,14 @@ fun Application.module(testing: Boolean = false) {
         }
     }
     install(ContentNegotiation) {
-        gson {
-        }
+        serialization(
+            contentType = ContentType.Application.Json,
+            json = Json(
+                DefaultJsonConfiguration.copy(
+                    prettyPrint = true
+                )
+            )
+        )
     }
     install(CallLogging) {
         level = Level.INFO

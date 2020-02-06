@@ -4,7 +4,6 @@ import com.github.leondevlifelog.JWTPrincipal
 import com.github.leondevlifelog.JwtConfig
 import com.github.leondevlifelog.model.*
 import io.ktor.application.call
-import io.ktor.application.log
 import io.ktor.auth.authenticate
 import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
@@ -15,6 +14,9 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.valiktor.ConstraintViolationException
+import org.valiktor.i18n.mapToMessage
+import java.util.*
 
 fun Routing.user() {
     route("/user") {
@@ -49,10 +51,13 @@ fun Routing.user() {
         }
         post("register") {
             val registerRequest: UserRegisterRequest = try {
-                call.receive<UserRegisterRequest>()
-            } catch (e: Exception) {
-                this.context.application.log.error("validate error", e)
-                call.respond(e)
+                val receive = call.receive<UserRegisterRequest>()
+                receive
+            } catch (e: ConstraintViolationException) {
+                e.constraintViolations.mapToMessage(locale = Locale.ENGLISH)
+                    .map { "${it.property}: ${it.message}" }
+                    .forEach(::println)
+                call.respond("error")
                 return@post
             }
             val user = transaction {
